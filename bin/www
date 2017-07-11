@@ -1,0 +1,136 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+var app = require('../app');
+var debug = require('debug')('arm:server');
+var http = require('http');
+/**
+ * Get port from environment and store in Express.
+ */
+
+var port = normalizePort(process.env.PORT || '3000');
+app.set('port', port);
+
+/**
+ * Create HTTP server.
+ */
+
+var server = http.createServer(app);
+var io = require('socket.io')(server);
+
+
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
+
+let count = 0;
+io.on('connection', function (socket) {
+  count++;
+  console.log('Connections: ', count);
+  var arm = require('../arm/arm');
+  socket.on('disconnect', () => {
+    count--;
+    console.log('Someone has disconnected');
+    console.log('Connections: ', count);
+  });
+
+  const updateServoPulseWidth = (motorType, pulseWidth) => {
+    arm.forEach(function (motor) {
+      if (motor.getName() === motorType) {
+        console.log(`Update ${motorType} with pulse width: ${pulseWidth}`);
+        motor.update(pulseWidth);
+      }
+    });
+  };
+
+  socket.on('GRIP', (pulseWidth) => {
+    //console.log("#####SOCKETID::", socket.id)
+    socket.broadcast.emit('GRIP_CHANGE', pulseWidth);
+    updateServoPulseWidth('GRIP', pulseWidth);
+  });
+
+  socket.on('RIGHT_ARM', (pulseWidth) => {
+    socket.broadcast.emit('RIGHT_ARM_CHANGE', pulseWidth);
+    updateServoPulseWidth('RIGHT_ARM', pulseWidth);
+  });
+
+  socket.on('LEFT_ARM', (pulseWidth) => {
+    socket.broadcast.emit('LEFT_ARM_CHANGE', pulseWidth);
+    updateServoPulseWidth('LEFT_ARM', pulseWidth);
+  });
+
+  socket.on('BASE', (pulseWidth) => {
+    socket.broadcast.emit('BASE_CHANGE', pulseWidth);
+    updateServoPulseWidth('BASE', pulseWidth);
+  });
+
+});
+
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}

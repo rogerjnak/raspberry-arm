@@ -1,0 +1,234 @@
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <link rel="shortcut icon" href="">
+</head>
+
+<style>
+    body {
+        position: relative;
+        overflow: hidden;
+        background: #32c8f5;
+    }
+
+    .motor {
+        position: relative;
+        display: inline-grid;
+        padding: 0 6%;
+    }
+
+    @media (max-width: 600px) {
+        .motor {
+            position: relative;
+            display: inline-grid;
+            padding: 0;
+        }
+    }
+
+    input[type="range"] {
+        transform: rotate(-90deg);
+    }
+
+    label {
+        padding-bottom: 70px;
+        color: #2c2f31;
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    }
+
+    input[type=range] {
+        -webkit-appearance: none;
+        margin: 18px 0;
+        width: 100%;
+    }
+
+    input[type=range]:focus {
+        outline: none;
+    }
+
+    input[type=range]::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 8.4px;
+        cursor: pointer;
+        animate: 0.2s;
+        box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+        background: #3071a9;
+        border-radius: 1.3px;
+        border: 0.2px solid #010101;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+        box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+        border: 1px solid #000000;
+        height: 36px;
+        width: 36px;
+        border-radius: 3px;
+        background: #ffffff;
+        cursor: pointer;
+        -webkit-appearance: none;
+        margin-top: -14px;
+    }
+
+    input[type=range]:focus::-webkit-slider-runnable-track {
+        background: #367ebd;
+    }
+
+    input[type=range]::-moz-range-track {
+        width: 100%;
+        height: 8.4px;
+        cursor: pointer;
+        animate: 0.2s;
+        box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+        background: #3071a9;
+        border-radius: 1.3px;
+        border: 0.2px solid #010101;
+    }
+
+    input[type=range]::-moz-range-thumb {
+        box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+        border: 1px solid #000000;
+        height: 36px;
+        width: 36px;
+        border-radius: 3px;
+        background: #ffffff;
+        cursor: pointer;
+    }
+
+    input[type=range]::-ms-track {
+        width: 100%;
+        height: 8.4px;
+        cursor: pointer;
+        animate: 0.2s;
+        background: transparent;
+        border-color: transparent;
+        border-width: 16px 0;
+        color: transparent;
+    }
+
+    input[type=range]::-ms-fill-lower {
+        background: #2a6495;
+        border: 0.2px solid #010101;
+        border-radius: 2.6px;
+        box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+    }
+
+    input[type=range]::-ms-fill-upper {
+        background: #3071a9;
+        border: 0.2px solid #010101;
+        border-radius: 2.6px;
+        box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+    }
+
+    input[type=range]::-ms-thumb {
+        box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+        border: 1px solid #000000;
+        height: 36px;
+        width: 16px;
+        border-radius: 3px;
+        background: #ffffff;
+        cursor: pointer;
+    }
+
+    input[type=range]:focus::-ms-fill-lower {
+        background: #3071a9;
+    }
+
+    input[type=range]:focus::-ms-fill-upper {
+        background: #367ebd;
+    }
+</style>
+
+<body>
+    <div class="main">
+        <div class="motor">
+            <label>HOOK</label>
+            <input type="range" id="hook" min="1750" max="2000" step="1" oninput="updateGrip(this.value)">
+        </div>
+        <div class="motor">
+            <label>RIGHT ARM</label>
+            <!--<input type="range" min="1400" max="2000" step="1" oninput="updateLeftArm(this.value)">-->
+            <input type="range" id="rightArm" min="1000" max="1750" step="1" oninput="updateRightArm(this.value)" style="direction: rtl">
+        </div>
+        <div class="motor">
+            <label>BASE</label>
+            <input type="range" id="base" min="1000" max="2000" step="1" oninput="updateBase(this.value)">
+        </div>
+    </div>
+    <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+    <script>
+        var socket = io();
+        socket.on('GRIP_CHANGE', (pulseWidth) => {
+            console.log(pulseWidth);
+            const hook = document.querySelector('#hook');
+            hook.value = pulseWidth;
+        });
+        socket.on('LEFT_ARM_CHANGE', (pulseWidth) => {
+            console.log(pulseWidth);
+            const hook = document.querySelector('#rightArm');
+            hook.value = pulseWidth;
+        });
+        socket.on('RIGHT_ARM_CHANGE', (pulseWidth) => {
+            console.log(pulseWidth);
+            const hook = document.querySelector('#rightArm');
+            hook.value = pulseWidth;
+        });
+        socket.on('BASE_CHANGE', (pulseWidth) => {
+            console.log(pulseWidth);
+            const hook = document.querySelector('#base');
+            hook.value = pulseWidth;
+        });
+        const updateGrip = (pulseWidth) => { socket.emit('GRIP', pulseWidth); };
+        const updateRightArm = (pulseWidth) => { socket.emit('RIGHT_ARM', pulseWidth); };
+        const updateLeftArm = (pulseWidth) => { socket.emit('LEFT_ARM', pulseWidth); };
+        const updateBase = (pulseWidth) => { socket.emit('BASE', pulseWidth); };
+
+        const startRec = () => {
+            var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
+            var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList;
+            var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'pt-BR';
+            
+            recognition.continuos = true;
+
+            recognition.onresult = (event) => {
+                var last = event.results.length - 1;
+                var recognized = event.results[last][0].transcript;
+                if (/abra.+garra/.test(recognized)) {
+                    const hook = document.querySelector('#hook');
+                    hook.value = 1750;
+                    socket.emit('GRIP', hook.value);
+                }
+                if (/fech.+garra/.test(recognized)) {
+                    const hook = document.querySelector('#hook');
+                    hook.value = 2000;
+                    socket.emit('GRIP', hook.value);
+                }
+                console.log("Recognized:", recognized);
+                
+            };
+
+            recognition.onstart = function () {
+                console.log("onstart");
+            }
+
+
+            recognition.onspeechstart = function () {
+                console.log("onspeechstart");
+            }
+
+            recognition.onspeechend = function () {
+                recognition.stop();
+                console.log("onspeechend");
+                startRec();
+            }
+
+            recognition.start();
+        }
+
+        startRec();
+    </script>
+</body>
+
+</html>
