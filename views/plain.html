@@ -231,8 +231,7 @@
                         
                      }
                      change();
-                }
-                if (/esquerda/i.test(recognized)) {
+                }else if (/esquerda/i.test(recognized)) {
                 console.log("pra direita");
                     const serv = document.querySelector('#base');
 			    let val = serv.value;
@@ -247,7 +246,7 @@
                      }
                      change();
                 }
-                if (/baix|desc/i.test(recognized)) {
+if (/baix|desc/i.test(recognized)) {
                 console.log("pra cima");
                     const serv = document.querySelector('#rightArm');
 			    let val = serv.value;
@@ -261,8 +260,7 @@
                         
                      }
                      change();
-                }
-if (/levant|cima|sob/i.test(recognized)) {
+                } else if (/levant|cima|sob|sub/i.test(recognized)) {
                 console.log("pra baixo");
                     const serv = document.querySelector('#rightArm');
 			    let val = serv.value;
