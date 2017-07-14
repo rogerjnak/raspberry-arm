@@ -36,6 +36,17 @@
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     }
 
+#falar {
+    background-color: #de9234;
+    border: none;
+    border-radius: 4px;
+    padding: 14px;
+    color: #e4ffff;
+    font-family: monospace;
+    margin: 17px;
+    font-size: 18px;
+}
+
     input[type=range] {
         -webkit-appearance: none;
         margin: 18px 0;
@@ -139,6 +150,7 @@
 </style>
 
 <body>
+<button id="falar">Falar</button>
     <div class="main">
         <div class="motor">
             <label>HOOK</label>
@@ -195,16 +207,77 @@
             recognition.onresult = (event) => {
                 var last = event.results.length - 1;
                 var recognized = event.results[last][0].transcript;
-                if (/abra.+garra/.test(recognized)) {
+                if (/abr.+garra/i.test(recognized)) {
                     const hook = document.querySelector('#hook');
                     hook.value = 1750;
                     socket.emit('GRIP', hook.value);
                 }
-                if (/fech.+garra/.test(recognized)) {
+                if (/fech.+garra/i.test(recognized)) {
                     const hook = document.querySelector('#hook');
                     hook.value = 2000;
                     socket.emit('GRIP', hook.value);
                 }
+                if (/direita/i.test(recognized)) {
+                console.log("pra esquerda");
+                    const serv = document.querySelector('#base');
+			    let val = serv.value;
+  	               const change = () => {
+			        if (val > 1000){
+				       --val;
+                             serv.value = val;
+                     	       socket.emit('BASE', val);
+                             setTimeout(change, 1);
+                        }
+                        
+                     }
+                     change();
+                }
+                if (/esquerda/i.test(recognized)) {
+                console.log("pra direita");
+                    const serv = document.querySelector('#base');
+			    let val = serv.value;
+  	               const change = () => {
+			        if (val < 2000){
+				       ++val;
+                             serv.value = val;
+                     	       socket.emit('BASE', val);
+                             setTimeout(change, 1);
+                        }
+                        
+                     }
+                     change();
+                }
+                if (/baix|desc/i.test(recognized)) {
+                console.log("pra cima");
+                    const serv = document.querySelector('#rightArm');
+			    let val = serv.value;
+  	               const change = () => {
+			        if (val < 1750){
+				       ++val;
+                             serv.value = val;
+                     	       socket.emit('RIGHT_ARM', val);
+                             setTimeout(change, 1);
+                        }
+                        
+                     }
+                     change();
+                }
+if (/levant|cima|sob/i.test(recognized)) {
+                console.log("pra baixo");
+                    const serv = document.querySelector('#rightArm');
+			    let val = serv.value;
+  	               const change = () => {
+			        if (val > 1000){
+				       --val;
+                             serv.value = val;
+                     	       socket.emit('RIGHT_ARM', val);
+                             setTimeout(change, 1);
+                        }
+                        
+                     }
+                     change();
+                }
+
                 console.log("Recognized:", recognized);
                 
             };
@@ -228,6 +301,8 @@
         }
 
         startRec();
+let btnFalar = document.querySelector("#falar");
+btnFalar.addEventListener("click", startRec);
     </script>
 </body>
 
